@@ -35,11 +35,91 @@ import fetch from "isomorphic-fetch"
 
 import DOM from 'react-dom'
 import React, {Component} from 'react'
+import Backbone from "bbfire"
+import CutiesView from "./cutiesView.js"
+import FavesView from "./favesView.js"
+
+//No need to import the Header because its imported through the CutiesView and FavesView
+
+
+// var url = "http://congress.api.sunlightfoundation.com/legislators/"
+// var apiKey = "325ade0da4514bb29ff036144a8bc016"
+//legislators?apikey=[your_api_key]
 
 function app() {
-    // start app
-    // new Router()
-    DOM.render(<p>test 2</p>, document.querySelector('.container'))
+
+//--------------------------//
+// Collection and Models    //
+//--------------------------//
+
+	var FaveCutiesCollection = Backbone.Firebase.Collection.extend({ //This is the url that firebase will sync with each time a new cutie is favorited
+		url: 'https://congressionalcuties.firebaseio.com/favecuties'
+	})
+
+	var CutieModel = Backbone.Model.extend({
+		defaults: {
+			'fave': false //This will affect the heart (for favorites)
+		}
+	})
+
+	var CongressionalCollection = Backbone.Collection.extend ({
+
+		url: "http://congress.api.sunlightfoundation.com/legislators/",
+		apiKey: "325ade0da4514bb29ff036144a8bc016",
+
+		parse: function(rawData){
+			console.log(rawData)
+			return rawData.results
+		},
+
+		model: CutieModel
+
+	})
+
+//--------------------------//
+//         Router           //
+//--------------------------//
+
+    var CongressionalRouter = Backbone.Router.extend ({
+
+		routes: {
+			"favorites": "handleFaves",
+			"*default": "handleCuties"
+		},
+
+		handleCuties: function() {
+			var cc = new CongressionalCollection()
+			var fc = new FaveCutiesCollection()
+			cc.fetch ({
+				data: {
+					"apikey": cc.apiKey
+				}
+			}).then(function(){
+				(DOM.render(<CutiesView cutieType="all" congressColl={cc} faveColl={fc}/>, document.querySelector('.container')))
+			})
+		},
+
+		handleFaves: function() {
+				
+			DOM.render(<CutiesView cutieType="fave" congressColl={new FaveCutiesCollection}/>, document.querySelector('.container'))
+		},
+
+		initialize: function() {
+			Backbone.history.start()
+		}
+
+	})
+
+//------------------------------------//
+//  Views - located in other js files //
+//------------------------------------//
+
+    var cr = new CongressionalRouter()
+    
 }
 
 app()
+
+
+
+

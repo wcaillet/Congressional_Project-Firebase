@@ -127,3 +127,35 @@ body {
 /**
  * App code
  */
+
+body{
+    background: pink;
+}
+
+.container{
+    width: 80%;
+    margin: 0 auto;
+    text-align: center;
+
+    .navBar{
+        a{
+            text-decoration: none;
+            margin: 100px;
+            border: 1px solid navy;
+        }
+    }
+
+    p{
+        color: purple;
+    }
+
+    // * {
+    //     border: 1px solid navy;
+    // }
+
+}
+
+
+
+
+
